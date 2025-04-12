@@ -20,3 +20,14 @@ model USER {
   role      USER_ROLE @default(CIDADAO)
   createdAt DateTime  @default(now())
 }
+
+model Ocorrencia {
+  ocorrenciaId     Int      @id @default(autoincrement())
+  userId           Int
+  UBSId            Int
+  descricao        String   @db.Text
+  arquivo_registro String
+  latitude         Float
+  longitude        Float
+  createdAt        DateTime @default(now())
+}
