@@ -1,20 +1,21 @@
-import express from "express";
+import express, { json } from "express";
 import cors from "cors";
 import { createServer } from "http";
 import { ServerErrorFilter } from "./middlewares/ErrorFIlter";
-import { BodyParserMiddleware } from "./middlewares/BodyParser";
+import { CriarUsuarioController } from "./controller/Criar-Usuario";
 
 const app = express();
 const httpServer = createServer(app);
 
 app.use(cors({ origin: "*" }));
-
-app.use(BodyParserMiddleware);  
+app.use(json());
 app.use(ServerErrorFilter);
 
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
+
+app.post("/user", CriarUsuarioController);
 
 app.post("/post", (req, res) => {
   console.log(req.body);
