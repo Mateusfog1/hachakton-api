@@ -4,30 +4,80 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("NEON_POSTGRES_PRISMA_URL")
+  url      = env("POSTGRES_PRISMA_URL")
 }
 
-enum USER_ROLE {
+model AreaAbrangencia {
+  id         Int       @id @default(autoincrement())
+  nomeBairro String
+  descricao  String?
+  Usuario    Usuario[]
+}
+
+model EstabelecimentoSaude {
+  id      Int                 @id @default(autoincrement())
+  nome    String
+  tipo    TipoEstabelecimento
+  bairro  String
+  cidade  String
+  cnes    String              @unique
+  Usuario Usuario[]
+}
+
+model FormularioAntivetor {
+  id                Int       @id @default(autoincrement())
+  agenteId          Int
+  dataPreenchimento DateTime  @default(now())
+  bairro            String
+  tipoVetor         String
+  localInspecao     String
+  resultado         String
+  validado          Boolean   @default(false)
+  dataValidacao     DateTime?
+  Usuario           Usuario   @relation(fields: [agenteId], references: [id])
+}
+
+model NotificacaoArbovirose {
+  id              Int       @id @default(autoincrement())
+  profissionalId  Int
+  dataNotificacao DateTime  @default(now())
+  tipoDoenca      String
+  nomePaciente    String
+  idadePaciente   Int
+  sexoPaciente    String
+  bairroPaciente  String
+  confirmada      Boolean   @default(false)
+  dataConfirmacao DateTime?
+  Usuario         Usuario   @relation(fields: [profissionalId], references: [id])
+}
+
+model Usuario {
+  id                    Int                     @id @default(autoincrement())
+  nome                  String
+  email                 String                  @unique
+  senha                 String
+  telefone              String?
+  tipo                  TipoUsuario
+  ativo                 Boolean                 @default(true)
+  dataCadastro          DateTime                @default(now())
+  areaAbrangenciaId     Int?
+  estabelecimentoId     Int?
+  FormularioAntivetor   FormularioAntivetor[]
+  NotificacaoArbovirose NotificacaoArbovirose[]
+  AreaAbrangencia       AreaAbrangencia?        @relation(fields: [areaAbrangenciaId], references: [id])
+  EstabelecimentoSaude  EstabelecimentoSaude?   @relation(fields: [estabelecimentoId], references: [id])
+}
+
+enum TipoEstabelecimento {
   UBS
-  CIDADAO
+  UPA
+  HOSPITAL
+  OUTRO
 }
 
-model USER {
-  userId    Int       @id @default(autoincrement())
-  name      String
-  email     String    @unique
-  password  String
-  role      USER_ROLE @default(CIDADAO)
-  createdAt DateTime  @default(now())
-}
-
-model Ocorrencia {
-  ocorrenciaId     Int      @id @default(autoincrement())
-  userId           Int
-  UBSId            Int
-  descricao        String   @db.Text
-  arquivo_registro String
-  latitude         Float
-  longitude        Float
-  createdAt        DateTime @default(now())
+enum TipoUsuario {
+  AGENTE_ENDEMIAS
+  PROFISSIONAL_SAUDE
+  GESTOR_AMBIENTAL
+  GESTOR_EPIDEMIOLOGICO
 }
